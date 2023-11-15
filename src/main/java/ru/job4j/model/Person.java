@@ -19,9 +19,11 @@ public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private int id;
+
+    @EqualsAndHashCode.Include
     private String login;
+    @EqualsAndHashCode.Include
     private String password;
 
 }

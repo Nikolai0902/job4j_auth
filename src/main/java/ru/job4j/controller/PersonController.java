@@ -3,20 +3,19 @@ package ru.job4j.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.model.Person;
-import ru.job4j.repository.PersonRepository;
-
+import ru.job4j.service.PersonService;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/person")
 public class PersonController {
 
-    private final PersonRepository persons;
+    private final PersonService persons;
+    private BCryptPasswordEncoder encoder;
 
     @GetMapping("/")
     public List<Person> findAll() {
@@ -34,6 +33,7 @@ public class PersonController {
 
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        person.setPassword(encoder.encode(person.getPassword()));
         return new ResponseEntity<Person>(
                 this.persons.save(person),
                 HttpStatus.CREATED
@@ -42,6 +42,7 @@ public class PersonController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
+        person.setPassword(encoder.encode(person.getPassword()));
         this.persons.save(person);
         return ResponseEntity.ok().build();
     }
