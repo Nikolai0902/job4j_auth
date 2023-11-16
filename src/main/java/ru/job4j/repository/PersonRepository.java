@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface PersonRepository extends CrudRepository<Person, Integer> {
 
-    Optional<Person> save(Person person);
-
     List<Person> findAll();
 
     Optional<Person> findByLogin(String login);

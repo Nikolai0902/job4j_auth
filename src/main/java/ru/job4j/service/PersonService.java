@@ -26,7 +26,8 @@ public class PersonService implements UserDetailsService {
 
     public Optional<Person> save(Person person) {
         person.setPassword(encoder.encode(person.getPassword()));
-        return personRepository.save(person);
+        Person result = personRepository.save(person);
+        return Optional.of(result);
     }
 
     public List<Person> findAll() {
