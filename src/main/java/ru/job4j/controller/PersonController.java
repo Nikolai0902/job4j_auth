@@ -5,8 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.model.Person;
 import ru.job4j.service.PersonService;
+
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
@@ -15,7 +18,6 @@ import java.util.List;
 public class PersonController {
 
     private final PersonService persons;
-    private BCryptPasswordEncoder encoder;
 
     @GetMapping("/")
     public List<Person> findAll() {
@@ -32,26 +34,31 @@ public class PersonController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Person> create(@RequestBody Person person) {
-        person.setPassword(encoder.encode(person.getPassword()));
+    public ResponseEntity<Person> create(@RequestBody Person person) throws SQLException {
+        var result = this.persons.save(person);
+        if (result.isEmpty()) {
+            throw new SQLException("Ошибка сохранения!");
+        }
         return new ResponseEntity<Person>(
-                this.persons.save(person),
-                HttpStatus.CREATED
+                result.orElse(new Person()),
+                result.isPresent() ? HttpStatus.CREATED : HttpStatus.CONFLICT
         );
     }
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        person.setPassword(encoder.encode(person.getPassword()));
-        this.persons.save(person);
-        return ResponseEntity.ok().build();
+        var personOptional = this.persons.save(person);
+        if (personOptional.isPresent()) {
+            return ResponseEntity.ok().build();
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Обьект не обновлен!");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
-        Person person = new Person();
-        person.setId(id);
-        this.persons.delete(person);
-        return ResponseEntity.ok().build();
+        if (this.persons.delete(id)) {
+            return ResponseEntity.ok().build();
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Объект не удален!");
     }
 }
