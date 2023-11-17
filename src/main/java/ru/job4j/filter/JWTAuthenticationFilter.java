@@ -32,7 +32,6 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
  * @author Buslaev
  */
 
-@AllArgsConstructor
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     public static final String SECRET = "SecretKeyToGenJWTs";
@@ -41,7 +40,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public static final String HEADER_STRING = "Authorization";
     public static final String SIGN_UP_URL = "/person/";
 
-    private AuthenticationManager auth;
+    private final AuthenticationManager auth;
+
+    public JWTAuthenticationFilter(AuthenticationManager auth) {
+        this.auth = auth;
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)

@@ -3,7 +3,6 @@ package ru.job4j.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.model.Person;
@@ -36,9 +35,6 @@ public class PersonController {
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) throws SQLException {
         var result = this.persons.save(person);
-        if (result.isEmpty()) {
-            throw new SQLException("Ошибка сохранения!");
-        }
         return new ResponseEntity<Person>(
                 result.orElse(new Person()),
                 result.isPresent() ? HttpStatus.CREATED : HttpStatus.CONFLICT
@@ -47,8 +43,7 @@ public class PersonController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        var personOptional = this.persons.save(person);
-        if (personOptional.isPresent()) {
+        if (this.persons.update(person)) {
             return ResponseEntity.ok().build();
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Обьект не обновлен!");

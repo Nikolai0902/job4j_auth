@@ -2,6 +2,7 @@ package ru.job4j.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,9 +26,14 @@ public class PersonService implements UserDetailsService {
     private BCryptPasswordEncoder encoder;
 
     public Optional<Person> save(Person person) {
+        Optional<Person> optionalPerson = Optional.empty();
         person.setPassword(encoder.encode(person.getPassword()));
-        Person result = personRepository.save(person);
-        return Optional.of(result);
+        try {
+            optionalPerson = Optional.of(personRepository.save(person));
+        } catch (DataIntegrityViolationException e) {
+            log.error("Пользователь с этим login уже существует", e);
+        }
+        return optionalPerson;
     }
 
     public List<Person> findAll() {
@@ -39,10 +45,8 @@ public class PersonService implements UserDetailsService {
     }
 
     public boolean delete(int id) {
-        Person person = new Person();
-        person.setId(id);
-        personRepository.delete(person);
-        return personRepository.findById(person.getId()).isEmpty();
+        var personOptional = personRepository.findById(id);
+        return personOptional.filter(person -> this.delete(person.getId())).isPresent();
     }
 
     public Optional<Person> findByLogin(String login) {
