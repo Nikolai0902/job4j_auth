@@ -18,11 +18,16 @@ import ru.job4j.service.PersonService;
 
 import static ru.job4j.filter.JWTAuthenticationFilter.SIGN_UP_URL;
 
-@AllArgsConstructor
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private PersonService personService;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final PersonService personService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public WebSecurity(PersonService personService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.personService = personService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

@@ -26,23 +26,23 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<Person> findById(@PathVariable int id) {
         var person = this.persons.findById(id);
-        return new ResponseEntity<Person>(
+        return new ResponseEntity<>(
                 person.orElse(new Person()),
                 person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
         );
     }
 
     @PostMapping("/")
-    public ResponseEntity<Person> create(@RequestBody Person person) throws SQLException {
+    public ResponseEntity<Person> create(@RequestBody Person person) {
         var result = this.persons.save(person);
-        return new ResponseEntity<Person>(
+        return new ResponseEntity<>(
                 result.orElse(new Person()),
                 result.isPresent() ? HttpStatus.CREATED : HttpStatus.CONFLICT
         );
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
+    public ResponseEntity<Boolean> update(@RequestBody Person person) {
         if (this.persons.update(person)) {
             return ResponseEntity.ok().build();
         }
