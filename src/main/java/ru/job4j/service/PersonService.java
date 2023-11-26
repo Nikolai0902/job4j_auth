@@ -3,15 +3,20 @@ package ru.job4j.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.model.Person;
 import ru.job4j.repository.PersonRepository;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +62,7 @@ public class PersonService implements UserDetailsService {
         var personOptional = personRepository.findById(person.getId());
         if (personOptional.isPresent()) {
             Person result = personOptional.get();
+            result.setLogin(person.getLogin());
             result.setPassword(encoder.encode(person.getPassword()));
             this.save(result);
             return true;

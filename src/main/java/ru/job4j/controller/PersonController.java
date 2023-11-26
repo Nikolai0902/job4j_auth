@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.model.Person;
+import ru.job4j.model.PersonDTO;
 import ru.job4j.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,16 +77,33 @@ public class PersonController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Объект не удален!");
     }
 
-    @ExceptionHandler(value = { IllegalArgumentException.class })
+    @PatchMapping("/")
+    public ResponseEntity<Void> patch(@RequestBody PersonDTO personDto) {
+        if (personDto.getId() == 0 || personDto.getPassword() == null
+                || personDto.getPassword().length() < 3) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+        var person = this.persons.findById(personDto.getId());
+        if (person.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Person is not found");
+        }
+        Person updatePerson = person.get();
+        updatePerson.setPassword(personDto.getPassword());
+        return new ResponseEntity<>(this.persons.update(updatePerson) ? HttpStatus.OK : HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = {IllegalArgumentException.class})
     public void exceptionHandler(Exception e,
                                  HttpServletRequest request,
                                  HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
-            put("message", e.getMessage());
-            put("type", e.getClass());
-        }}));
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() {
+            {
+                put("message", e.getMessage());
+                put("type", e.getClass());
+            }
+        }));
         log.error(e.getLocalizedMessage());
     }
 }
