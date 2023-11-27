@@ -13,6 +13,7 @@ import ru.job4j.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -44,25 +45,18 @@ public class PersonController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Person> create(@RequestBody Person person) {
-        if (person.getPassword() == null || person.getLogin() == null) {
-            throw new NullPointerException("Login and password mustn't be empty");
-        }
-        if (person.getPassword().length() < 3 || person.getLogin().length() < 3) {
-            throw new IllegalArgumentException("Invalid login or password");
-        }
+    public ResponseEntity<Person> create(@Valid @RequestBody Person person) {
         var result = this.persons.save(person);
+        if (result.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Пользователь с этим login уже существует");
+        }
         return new ResponseEntity<>(
-                result.orElse(new Person()),
-                result.isPresent() ? HttpStatus.CREATED : HttpStatus.CONFLICT
+                result.get(), HttpStatus.CREATED
         );
     }
 
     @PutMapping("/")
-    public ResponseEntity<Boolean> update(@RequestBody Person person) {
-        if (person.getPassword().length() < 3 || person.getLogin().length() < 3) {
-            throw new IllegalArgumentException("Invalid login or password");
-        }
+    public ResponseEntity<Boolean> update(@Valid @RequestBody Person person) {
         if (this.persons.update(person)) {
             return ResponseEntity.ok().build();
         }
@@ -78,17 +72,20 @@ public class PersonController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<Void> patch(@RequestBody PersonDTO personDto) {
-        if (personDto.getId() == 0 || personDto.getPassword() == null
-                || personDto.getPassword().length() < 3) {
-            throw new IllegalArgumentException("Invalid password");
-        }
+    public ResponseEntity<Void> patch(@Valid @RequestBody PersonDTO personDto) {
         Person updatePerson = new Person();
         updatePerson.setId(personDto.getId());
         updatePerson.setPassword(personDto.getPassword());
         return new ResponseEntity<>(this.persons.update(updatePerson) ? HttpStatus.OK : HttpStatus.CONFLICT);
     }
 
+    /**
+     * Используется если выброс очень специфичного исключения;
+     * @param e сообщение специфического исключения
+     * @param request запос
+     * @param response ответ
+     * @throws IOException
+     */
     @ExceptionHandler(value = {IllegalArgumentException.class})
     public void exceptionHandler(Exception e,
                                  HttpServletRequest request,
