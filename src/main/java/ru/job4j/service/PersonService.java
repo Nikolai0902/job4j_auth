@@ -62,7 +62,9 @@ public class PersonService implements UserDetailsService {
         var personOptional = personRepository.findById(person.getId());
         if (personOptional.isPresent()) {
             Person result = personOptional.get();
-            result.setLogin(person.getLogin());
+            if (person.getLogin() != null) {
+                result.setLogin(person.getLogin());
+            }
             result.setPassword(encoder.encode(person.getPassword()));
             this.save(result);
             return true;

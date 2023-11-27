@@ -83,11 +83,8 @@ public class PersonController {
                 || personDto.getPassword().length() < 3) {
             throw new IllegalArgumentException("Invalid password");
         }
-        var person = this.persons.findById(personDto.getId());
-        if (person.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Person is not found");
-        }
-        Person updatePerson = person.get();
+        Person updatePerson = new Person();
+        updatePerson.setId(personDto.getId());
         updatePerson.setPassword(personDto.getPassword());
         return new ResponseEntity<>(this.persons.update(updatePerson) ? HttpStatus.OK : HttpStatus.CONFLICT);
     }
