@@ -12,6 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * Аннотация @ControllerAdvice используемая совместно с @ExceptionHandler.
+ * GlobalExceptionHandler обрабатывает все исключения NullPointerException, которые возникают во всех контроллерах.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
