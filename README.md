@@ -3,10 +3,17 @@
 **REST service для модели Person**
 
 Сервис реализован с помощью генератора проекта для Spring https://start.spring.io/.
+В проекте реализуется функционал RESTFul архитектуры, в том числе
 
+    Создание REST service
+    Авторизация JWT
+    Обработка исключений и Spring REST
+    ResponseEntity
+    DTO
+    Валидация моделей в Spring REST
 
 _Контакты для связи:_
-__**kbus94@yandex.ru**__
+__**tg:https://t.me/Nkbusl**__
 
 ### Для запуска необходимо:
 1. [x] Java 17;
